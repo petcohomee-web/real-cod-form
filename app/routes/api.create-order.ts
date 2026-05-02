@@ -2,17 +2,15 @@ export async function action({ request }: { request: Request }) {
   try {
     const body = await request.json();
 
-    console.log("COD DATA:", body);
+    console.log("GELEN DATA:", body);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Sipariş test olarak alındı",
+        message: "Sipariş alındı (Vercel canlı)",
       }),
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -22,9 +20,7 @@ export async function action({ request }: { request: Request }) {
         message: "Server error",
       }),
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
