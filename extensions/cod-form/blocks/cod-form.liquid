@@ -1,0 +1,74 @@
+<button id="cod-open-btn" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;">
+  Kapıda Ödeme ile Satın Al
+</button>
+
+<div id="cod-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;">
+  <div style="background:white;padding:20px;max-width:400px;margin:10% auto;border-radius:10px;position:relative;">
+    
+    <button id="cod-close-btn" style="position:absolute;top:10px;right:10px;border:none;background:none;font-size:20px;">×</button>
+
+    <h2>Kapıda Ödeme</h2>
+
+    <input id="cod-name" placeholder="Ad Soyad" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="cod-phone" placeholder="Telefon" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="cod-address" placeholder="Adres" style="width:100%;padding:10px;margin-bottom:10px;" />
+
+    <button id="cod-submit" type="button" style="width:100%;padding:12px;background:black;color:white;border:none;border-radius:6px;">
+      Siparişi Tamamla
+    </button>
+
+  </div>
+</div>
+
+<script>
+document.getElementById("cod-open-btn").onclick = function() {
+  document.getElementById("cod-modal").style.display = "block";
+};
+
+document.getElementById("cod-close-btn").onclick = function() {
+  document.getElementById("cod-modal").style.display = "none";
+};
+
+document.getElementById("cod-submit").onclick = async function() {
+  alert("buton çalıştı");
+
+  const name = document.getElementById("cod-name").value;
+  const phone = document.getElementById("cod-phone").value;
+  const address = document.getElementById("cod-address").value;
+
+  try {
+    const res = await fetch("https://scroll-behalf-distinct-leads.trycloudflare.com/api/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        address: address,
+        variantId: {{ product.variants.first.id | json }}
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Sipariş alındı ✅");
+      document.getElementById("cod-modal").style.display = "none";
+    } else {
+      alert("Hata oluştu ❌");
+    }
+
+  } catch (err) {
+    alert("Server hatası ❌");
+  }
+};
+</script>
+
+{% schema %}
+{
+  "name": "COD Form",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
