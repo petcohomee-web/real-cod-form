@@ -49,9 +49,9 @@
     submitBtn.innerText = "Sipariş gönderiliyor...";
 
     try {
-     const res = await fetch("https://real-cod-form.vercel.app/api/create-order", {
+   await fetch("https://real-cod-form.vercel.app/api/create-order", {
   method: "POST",
-  mode: "cors",
+  mode: "no-cors",
   body: JSON.stringify({
     name,
     phone,
@@ -60,16 +60,9 @@
   })
 });
 
-      const data = await res.json();
-
-      console.log("COD RESPONSE:", data);
-
-      if (data.success) {
-        alert("Sipariş alındı ✅");
-        modal.style.display = "none";
-      } else {
-        alert("Hata oluştu ❌");
-      }
+alert("İstek gönderildi ✅");
+modal.style.display = "none";
+return;
 
     } catch (err) {
       console.error("COD ERROR:", err);
