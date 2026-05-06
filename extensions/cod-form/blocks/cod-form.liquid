@@ -49,15 +49,16 @@
     submitBtn.innerText = "Sipariş gönderiliyor...";
 
     try {
-      const res = await fetch("https://real-cod-form.vercel.app/api/create-order", {
-        method: "POST",
-        body: JSON.stringify({
-  name: name,
-  phone: phone,
-  address: address,
-  variantId: "{{ product.selected_or_first_available_variant.id }}"
-})
-      });
+     const res = await fetch("https://real-cod-form.vercel.app/api/create-order", {
+  method: "POST",
+  mode: "cors",
+  body: JSON.stringify({
+    name,
+    phone,
+    address,
+    variantId: "{{ product.selected_or_first_available_variant.id }}"
+  })
+});
 
       const data = await res.json();
 
