@@ -1,9 +1,26 @@
+export async function loader() {
+  return new Response(
+    JSON.stringify({
+      success: false,
+      message: "API çalışıyor ✅ POST gönder"
+    }),
+    {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+}
+
 export async function action({ request }: { request: Request }) {
   try {
+    const body = await request.json();
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: "API çalışıyor 🚀"
+        message: "POST çalışıyor ✅",
+        received: body
       }),
       {
         headers: {
