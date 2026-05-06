@@ -16,12 +16,10 @@ export async function loader() {
 }
 
 export async function action({ request }: { request: Request }) {
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
   try {
     const body = await request.json();
+
+    const quantity = Number(body.quantity || 1);
 
     const response = await fetch(
       `https://${process.env.SHOPIFY_STORE}/admin/api/2025-01/orders.json`,
@@ -36,14 +34,15 @@ export async function action({ request }: { request: Request }) {
             line_items: [
               {
                 variant_id: Number(body.variantId),
-                quantity: 1,
+                quantity: quantity,
               },
             ],
             financial_status: "pending",
             note: `COD Sipariş
 İsim: ${body.name}
 Telefon: ${body.phone}
-Adres: ${body.address}`,
+Adres: ${body.address}
+Adet: ${quantity}`,
           },
         }),
       }
@@ -51,19 +50,9 @@ Adres: ${body.address}`,
 
     const data = await response.json();
 
-    if (!response.ok) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: data,
-        }),
-        { status: 200, headers: corsHeaders }
-      );
-    }
-
     return new Response(
       JSON.stringify({
-        success: true,
+        success: response.ok,
         shopify: data,
       }),
       { headers: corsHeaders }
