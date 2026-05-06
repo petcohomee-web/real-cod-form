@@ -1,26 +1,27 @@
 export async function action({ request }: { request: Request }) {
   try {
-    const body = await request.json();
-
-    console.log("GELEN DATA:", body);
-
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Sipariş alındı (Vercel canlı)",
+        message: "API çalışıyor 🚀"
       }),
       {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
     );
-  } catch (error) {
+  } catch (err) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: "Server error",
+        error: String(err)
       }),
       {
-        headers: { "Content-Type": "application/json" },
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
     );
   }

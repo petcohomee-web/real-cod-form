@@ -1,11 +1,11 @@
-<button id="cod-open-btn" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;">
+<button id="cod-open-btn" type="button" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;">
   Kapıda Ödeme ile Satın Al
 </button>
 
 <div id="cod-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;">
   <div style="background:white;padding:20px;max-width:400px;margin:10% auto;border-radius:10px;position:relative;">
     
-    <button id="cod-close-btn" style="position:absolute;top:10px;right:10px;border:none;background:none;font-size:20px;">×</button>
+    <button id="cod-close-btn" type="button" style="position:absolute;top:10px;right:10px;border:none;background:none;font-size:20px;cursor:pointer;">×</button>
 
     <h2>Kapıda Ödeme</h2>
 
@@ -13,7 +13,7 @@
     <input id="cod-phone" placeholder="Telefon" style="width:100%;padding:10px;margin-bottom:10px;" />
     <input id="cod-address" placeholder="Adres" style="width:100%;padding:10px;margin-bottom:10px;" />
 
-    <button id="cod-submit" type="button" style="width:100%;padding:12px;background:black;color:white;border:none;border-radius:6px;">
+    <button id="cod-submit" type="button" style="width:100%;padding:12px;background:black;color:white;border:none;border-radius:6px;cursor:pointer;">
       Siparişi Tamamla
     </button>
 
@@ -21,48 +21,67 @@
 </div>
 
 <script>
-document.getElementById("cod-open-btn").onclick = function() {
-  document.getElementById("cod-modal").style.display = "block";
-};
+(function () {
+  const openBtn = document.getElementById("cod-open-btn");
+  const closeBtn = document.getElementById("cod-close-btn");
+  const modal = document.getElementById("cod-modal");
+  const submitBtn = document.getElementById("cod-submit");
 
-document.getElementById("cod-close-btn").onclick = function() {
-  document.getElementById("cod-modal").style.display = "none";
-};
+  openBtn.onclick = function () {
+    modal.style.display = "block";
+  };
 
-document.getElementById("cod-submit").onclick = async function() {
-  alert("buton çalıştı");
+  closeBtn.onclick = function () {
+    modal.style.display = "none";
+  };
 
-  const name = document.getElementById("cod-name").value;
-  const phone = document.getElementById("cod-phone").value;
-  const address = document.getElementById("cod-address").value;
+  submitBtn.onclick = async function () {
+    const name = document.getElementById("cod-name").value.trim();
+    const phone = document.getElementById("cod-phone").value.trim();
+    const address = document.getElementById("cod-address").value.trim();
 
-  try {
-    const res = await fetch("https://scroll-behalf-distinct-leads.trycloudflare.com/api/create-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name: name,
-        phone: phone,
-        address: address,
-        variantId: {{ product.variants.first.id | json }}
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      alert("Sipariş alındı ✅");
-      document.getElementById("cod-modal").style.display = "none";
-    } else {
-      alert("Hata oluştu ❌");
+    if (!name || !phone || !address) {
+      alert("Lütfen tüm alanları doldurun ❌");
+      return;
     }
 
-  } catch (err) {
-    alert("Server hatası ❌");
-  }
-};
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Sipariş gönderiliyor...";
+
+    try {
+      const res = await fetch("https://real-cod-form.vercel.app/api/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          address: address,
+          variantId: {{ product.selected_or_first_available_variant.id | json }}
+        })
+      });
+
+      const data = await res.json();
+
+      console.log("COD RESPONSE:", data);
+
+      if (data.success) {
+        alert("Sipariş alındı ✅");
+        modal.style.display = "none";
+      } else {
+        alert("Hata oluştu ❌");
+      }
+
+    } catch (err) {
+      console.error("COD ERROR:", err);
+      alert("Server hatası ❌");
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.innerText = "Siparişi Tamamla";
+  };
+})();
 </script>
 
 {% schema %}
