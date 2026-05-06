@@ -1,19 +1,22 @@
-<button id="cod-open-btn" type="button" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;">
+<button id="cod-open-btn" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;">
   Kapıda Ödeme ile Satın Al
 </button>
 
 <div id="cod-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;">
-  <div style="background:white;padding:20px;max-width:400px;margin:10% auto;border-radius:10px;position:relative;">
-    
-    <button id="cod-close-btn" type="button" style="position:absolute;top:10px;right:10px;border:none;background:none;font-size:20px;cursor:pointer;">×</button>
+  <div style="background:white;padding:22px;max-width:420px;margin:10% auto;border-radius:14px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25);">
 
-    <h2>Kapıda Ödeme</h2>
+    <button id="cod-close-btn" type="button" style="position:absolute;top:12px;right:14px;border:none;background:none;font-size:24px;cursor:pointer;">×</button>
 
-    <input id="cod-name" placeholder="Ad Soyad" style="width:100%;padding:10px;margin-bottom:10px;" />
-    <input id="cod-phone" placeholder="Telefon" style="width:100%;padding:10px;margin-bottom:10px;" />
-    <input id="cod-address" placeholder="Adres" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <h2 style="margin:0 0 8px;font-size:26px;">Kapıda Ödeme</h2>
+    <p style="margin:0 0 18px;color:#666;font-size:14px;">Bilgilerinizi girin, siparişinizi hemen oluşturalım.</p>
 
-    <button id="cod-submit" type="button" style="width:100%;padding:12px;background:black;color:white;border:none;border-radius:6px;cursor:pointer;">
+    <input id="cod-name" placeholder="Ad Soyad" style="width:100%;padding:13px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;" />
+    <input id="cod-phone" placeholder="Telefon" style="width:100%;padding:13px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;" />
+    <input id="cod-address" placeholder="Adres" style="width:100%;padding:13px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;" />
+
+    <div id="cod-message" style="display:none;margin-bottom:12px;padding:10px;border-radius:8px;font-size:14px;"></div>
+
+    <button id="cod-submit" type="button" style="width:100%;padding:14px;background:black;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">
       Siparişi Tamamla
     </button>
 
@@ -26,14 +29,24 @@
   const closeBtn = document.getElementById("cod-close-btn");
   const modal = document.getElementById("cod-modal");
   const submitBtn = document.getElementById("cod-submit");
+  const messageBox = document.getElementById("cod-message");
 
   openBtn.onclick = function () {
     modal.style.display = "block";
+    messageBox.style.display = "none";
   };
 
   closeBtn.onclick = function () {
     modal.style.display = "none";
   };
+
+  function showMessage(text, type) {
+    messageBox.innerText = text;
+    messageBox.style.display = "block";
+    messageBox.style.background = type === "success" ? "#e9f9ef" : "#fff0f0";
+    messageBox.style.color = type === "success" ? "#137333" : "#b00020";
+    messageBox.style.border = type === "success" ? "1px solid #b7e4c7" : "1px solid #ffc2c2";
+  }
 
   submitBtn.onclick = async function () {
     const name = document.getElementById("cod-name").value.trim();
@@ -41,32 +54,34 @@
     const address = document.getElementById("cod-address").value.trim();
 
     if (!name || !phone || !address) {
-      alert("Lütfen tüm alanları doldurun ❌");
+      showMessage("Lütfen tüm alanları doldurun.", "error");
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Sipariş gönderiliyor...";
+    submitBtn.innerText = "Sipariş oluşturuluyor...";
+    messageBox.style.display = "none";
 
     try {
-   await fetch("https://real-cod-form.vercel.app/api/create-order", {
-  method: "POST",
-  mode: "no-cors",
-  body: JSON.stringify({
-    name,
-    phone,
-    address,
-    variantId: "{{ product.selected_or_first_available_variant.id }}"
-  })
-});
+      await fetch("https://real-cod-form.vercel.app/api/create-order", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          address: address,
+          variantId: "{{ product.selected_or_first_available_variant.id }}"
+        })
+      });
 
-alert("İstek gönderildi ✅");
-modal.style.display = "none";
-return;
+      showMessage("Siparişiniz alındı ✅", "success");
+
+      setTimeout(function () {
+        modal.style.display = "none";
+      }, 1200);
 
     } catch (err) {
-      console.error("COD ERROR:", err);
-      alert("Server hatası ❌");
+      showMessage("Sipariş oluşturulamadı. Lütfen tekrar deneyin.", "error");
     }
 
     submitBtn.disabled = false;
