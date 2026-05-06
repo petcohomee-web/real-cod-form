@@ -1,18 +1,25 @@
+const corsHeaders = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 export async function loader() {
   return new Response(
     JSON.stringify({
       success: false,
-      message: "API çalışıyor ✅"
+      message: "API çalışıyor ✅ POST gönder",
     }),
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
+    { headers: corsHeaders }
   );
 }
 
 export async function action({ request }: { request: Request }) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   try {
     const body = await request.json();
 
@@ -22,24 +29,21 @@ export async function action({ request }: { request: Request }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Shopify-Access-Token":
-            process.env.SHOPIFY_ACCESS_TOKEN || "",
+          "X-Shopify-Access-Token": process.env.SHOPIFY_ACCESS_TOKEN || "",
         },
         body: JSON.stringify({
           order: {
             line_items: [
               {
-                variant_id: body.variantId,
+                variant_id: Number(body.variantId),
                 quantity: 1,
               },
             ],
             financial_status: "pending",
-            gateway: "Cash on Delivery",
-            note: `
+            note: `COD Sipariş
 İsim: ${body.name}
 Telefon: ${body.phone}
-Adres: ${body.address}
-            `,
+Adres: ${body.address}`,
           },
         }),
       }
@@ -47,16 +51,22 @@ Adres: ${body.address}
 
     const data = await response.json();
 
+    if (!response.ok) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: data,
+        }),
+        { status: 200, headers: corsHeaders }
+      );
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         shopify: data,
       }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      { headers: corsHeaders }
     );
   } catch (err) {
     return new Response(
@@ -64,12 +74,7 @@ Adres: ${body.address}
         success: false,
         error: String(err),
       }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      { status: 200, headers: corsHeaders }
     );
   }
 }
